@@ -1,81 +1,126 @@
-#Installer Magento 2.4 en utilisant Docker et Docker-Compose.
+# Magento 2 Docker
 
+[![Build Status][ico-travis]][link-travis]
+[![Docker Build Status][ico-dockerbuild]][link-dockerhub]
+[![Docker Pulls][ico-downloads]][link-dockerhub]
+[![Docker Stars][ico-dockerstars]][link-dockerhub]
 
-[![vagrant](https://img.shields.io/badge/vagrant-debian:stretch-blue.svg?longCache=true&style=flat&label=vagrant&logo=vagrant)](https://app.vagrantup.com/debian/boxes/stretch64)
-[![dev-box](https://img.shields.io/badge/git/composer-blue.svg?longCache=true&style=flat&label=setup&logo=magento)](https://github.com/zepgram/magento2-fast-vm/blob/master/config.yaml.example)
-[![mount](https://img.shields.io/badge/nfs/rsync-blue.svg?longCache=true&style=flat&label=mount)](https://github.com/zepgram/magento2-fast-vm/releases)
-[![release](https://img.shields.io/badge/release-v1.3.6-blue.svg?longCache=true&style=flat&label=release)](https://github.com/zepgram/magento2-fast-vm/releases)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg?longCache=true&style=flat&label=license)](https://github.com/zepgram/magento2-fast-vm/blob/master/LICENSE)
+A collection of Docker images for running Magento 2 through nginx and on the command line.
 
-![windows](https://img.shields.io/badge/windows-ok-green.svg?longCache=true&style=flat&label=windows&logo=windows)
-![apple](https://img.shields.io/badge/mac-ok-green.svg?longCache=true&style=flat&label=mac&logo=apple)
-![linux](https://img.shields.io/badge/linux-ok-green.svg?longCache=true&style=flat&label=linux&logo=linux)
+## Quick Start
 
-![image](https://user-images.githubusercontent.com/16258478/68086496-0d43e100-fe4d-11e9-95ea-2bce3bee9884.png)&nbsp;&nbsp;&nbsp;&nbsp;![image](https://user-images.githubusercontent.com/16258478/68086436-70814380-fe4c-11e9-8ef4-6e39388cc679.png)&nbsp;&nbsp;&nbsp;&nbsp;![image](https://user-images.githubusercontent.com/16258478/68086442-7545f780-fe4c-11e9-8c5e-518ddba8735d.png)&nbsp;&nbsp;&nbsp;&nbsp;![image](https://user-images.githubusercontent.com/16258478/68086695-ba6b2900-fe4e-11e9-8f4f-68feb9bb0db2.png)&nbsp;&nbsp;&nbsp;&nbsp;![image](https://user-images.githubusercontent.com/16258478/68086427-62cbbe00-fe4c-11e9-83d5-24aec5b7c686.png)
+    cp composer.env.sample composer.env
+    # ..put the correct tokens into composer.env
 
-[![associate-developer](https://images.youracclaim.com/size/340x340/images/48e73336-c91d-477f-a66f-3ad950acb597/Adobe_Certified_Professional_Experience_Cloud_products_Digital_Badge.png)](https://www.youracclaim.com/earner/earned/badge/406cc91a-0fda-4a6f-846b-19d7f8b59e0a)
+    mkdir magento
 
-#Sources
-Avant de commencer, cela fait un moment que j’utilise Docker pour développer sous Magento 2. Après avoir testé plusieurs solutions, je me suis basé sur la solution proposée par Mark Shust.
-J’ai également visionné un paquet de vidéos de la chaîne Xavki.
+    docker-compose run cli magento-installer
+    docker-compose up -d
+    docker-compose restart
 
-#Arborescence
-Commencer par créer le répertoire de travail et au sein de ce dossier, créer les répertoires suivants :
+## Configuration
 
-mkdir -p src/app_data1 src/nginx_log1 src/phpfpm_log1 src/sock_data1 src/mariadb_data1 src/m
+Configuration is driven through environment variables.  A comprehensive list of the environment variables used can be found in each `Dockerfile` and the commands in each `bin/` directory.
 
-#Build et Installation
+* `PHP_MEMORY_LIMIT` - The memory limit to be set in the `php.ini`
+* `UPLOAD_MAX_FILESIZE` - Upload filesize limit for PHP and Nginx
+* `MAGENTO_RUN_MODE` - Valid values, as defined in `Magento\Framework\App\State`: `developer`, `production`, `default`.
+* `MAGENTO_ROOT` - The directory to which Magento should be installed (defaults to `/var/www/magento`)
+* `COMPOSER_GITHUB_TOKEN` - Your [GitHub OAuth token](https://getcomposer.org/doc/articles/troubleshooting.md#api-rate-limit-and-oauth-tokens), should it be needed
+* `COMPOSER_MAGENTO_USERNAME` - Your Magento Connect public authentication key ([how to get](http://devdocs.magento.com/guides/v2.0/install-gde/prereq/connect-auth.html))
+* `COMPOSER_MAGENTO_PASSWORD` - Your Magento Connect private authentication key
+* `COMPOSER_BITBUCKET_KEY` - Optional - Your Bitbucket OAuth key ([how to get](https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html))
+* `COMPOSER_BITBUCKET_SECRET` - Optional - Your Bitbucket OAuth secret
+* `DEBUG` - Toggles tracing in the bash commands when exectued; nothing to do with Magento`
+* `PHP_ENABLE_XDEBUG` - When set to `true` it will include the Xdebug ini file as part of the PHP configuration, turning it on. It's recommended to only switch this on when you need it as it will slow down the application.
+* `UPDATE_UID_GID` - If this is set to "true" then the uid and gid of `www-data` will be modified in the container to match the values on the mounted folders.  This seems to be necessary to work around virtualbox issues on OSX.
 
-Lancer la commande ci-dessous pour construire et lancer les conteneurs :
+A sample `docker-compose.yml` is provided in this repository.
 
-docker-compose build && docker-compose up -d
-Une fois les conteneurs lancés, télécharger et créer le projet Magento 2.4 :
+## CLI Usage
 
-docker-compose exec phpfpm composer create-project --repository=https://repo.magento.com/ magento/project-community-edition:2.4 .
-Dès que les fichiers ont été téléchargés, vous pouvez lancer l’installation :
+A number of commands are baked into the image and are available on the `$PATH`. These are:
 
-docker-compose exec -T phpfpm bin/magento setup:install \
-  --db-host=mariadb1 \
-  --db-name=magento \
-  --db-user=magento \
-  --db-password=magento \
-  --base-url=http://localhost/ \
-  --backend-frontname=system \
-  --admin-firstname=Administrateur \
-  --admin-lastname=Magento \
-  --admin-email=adresse@email.com \
-  --admin-user=administrateur \
-  --admin-password=mettreIciVotreMotDePasse \
-  --language=fr_FR \
-  --currency=EUR \
-  --timezone=Europe/Paris \ 
-  --use-rewrites=1 \
-  --search-engine=elasticsearch7 \
-  --elasticsearch-host=elasticsearch1 \
-  --elasticsearch-port=9200 \
-  --elasticsearch-index-prefix=magento
-A cet instant, Magento est installé, avant de vous lancer, je vous invite à lancer les commandes ci-dessous :
+* `magento-command` - Provides a user-safe wrapper around the `bin/magento` command.
+* `magento-installer` - Installs and configures Magento into the directory defined in the `$MAGENTO_ROOT` environment variable.
+* `magento-extension-installer` - Installs a Magento 2 extension from the `/extensions/<name>` directory, using symlinks.
+* `magerun2` - A user-safe wrapper for `n98-magerun2.phar`, which provides a wider range of useful commands. [Learn more here](https://github.com/netz98/n98-magerun2)
 
-#Activation de RabbitMQ :
+It's recommended that you mount an external folder to `/root/.composer/cache`, otherwise you'll be waiting all day for Magento to download every time the container is booted.
 
-docker-compose exec -T phpfpm bin/magento setup:config:set --no-interaction --amqp-host=rabbitmq --amqp-port=5672 --amqp-user=magento --amqp-password=magento --amqp-virtualhost=/ --consumers-wait-for-messages=1
+CLI commands can be triggered by running:
 
-#Activation de Redis :
+    docker-compose run cli magento-installer
 
-docker-compose exec -T phpfpm bin/magento setup:config:set --no-interaction --cache-backend=redis --cache-backend-redis-server=redis --cache-backend-redis-db=0
+Shell access to a CLI container can be triggered by running:
 
-#Activation de Redis pour le Full Page Cache :
+    docker-compose run cli bash
 
-docker-compose exec -T phpfpm bin/magento setup:config:set --no-interaction  --page-cache=redis --page-cache-redis-server=redis --page-cache-redis-db=1
+## Sendmail
 
-#Activation de Redis pour les sessions :
+All images have sendmail installed for emails, however it is not enabled by default. To enable sendmail, use the following environment variable:
 
-docker-compose exec -T phpfpm bin/magento setup:config:set --no-interaction --session-save=redis --session-save-redis-host=redis --session-save-redis-log-level=4 --session-save-redis-db=2
+    ENABLE_SENDMAIL=true
 
-#Redémarrer les conteneurs :
+*Note:* If sendmail has been enabled, make sure the container has a hostname assigned using the `hostname` field in `docker-compose.yml` or `--hostname` parameter for `docker run`. If the container does not have a hostname set, sendmail will attempt to discover the hostname on startup, blocking for a prolonged period of time.
 
-docker-compose stop && docker-compose up -d
+## Implementation Notes
 
-#Installation des modules dans la base de données :
+* In order to achieve a sane environment for executing commands in, a `docker-environment` script is included as the `ENTRYPOINT` in the container.
 
-docker-compose exec -T phpfpm bin/magento setup:upgrade && docker-compose exec -T phpfpm bin/magento setup:di:compile
+## xdebug Usage
+
+To enable xdebug, you will need to toggle the `PHP_ENABLE_XDEBUG` environment variable to `true` in `global.env`. Then when using docker-compose you will need to restart the fpm container using `docker-compose up -d`, or stopping and starting the container.
+
+## Varnish
+
+Varnish is running out of the container by default. If you do not require varnish, then you will need to remove the varnish block from your `docker-compose.yml` and uncomment the `environment` section under the `web` container definition.
+
+To clear varnish, you can use the `cli` containers `magento-command` to clear the cache, which will include varnish. Alternatively, you could restart the varnish container.
+
+    docker-compose run --rm cli magento-command cache:flush
+    # OR
+    docker-compose restart varnish
+
+If you need to add your own VCL, then it needs to be mounted to: `/data/varnish.vcl`.
+
+## Building
+
+A lot of the configuration for each image is the same, with the difference being the base image that they're extending from.  For this reason we use `php` to build the `Dockerfile` from a set of templates in `src/`.  The `Dockerfile` should still be published to the repository due to Docker Hub needing a `Dockerfile` to build from.
+
+To build all `Dockerfile`s, run the `builder.php` script in the `php:7` Docker image:<!-- Yo dawg, I heard you like Docker images... -->
+
+    docker run --rm -it -v $(pwd):/src php:7 php /src/builder.php
+
+### Adding new images to the build config
+
+The build configuration is controlled by the `config.json` file. Yeah element in the top level hash is a new build target, using the following syntax:
+
+    "<target-name>": {
+        "version": "<php-version>",
+        "flavour": "<image-flavour>",
+        "files": {
+            "<target-file-name>": {
+                "<template-variable-name>": "<template-variable-value>",
+                ...
+            },
+    }
+
+The target files will be rendered in the `<php-version>-<image-flavour>/` directory.
+
+The source template for each target file is selected from the `src/` directory using the following fallback order:
+
+1. `<target-file-name>-<php-version>-<image-flavour>`
+2. `<target-file-name>-<php-version>`
+3. `<target-file-name>-<image-flavour>`
+4. `<target-file-name>`
+
+Individual templates may include other templates as partials.
+
+[ico-travis]: https://img.shields.io/travis/meanbee/docker-magento2.svg?style=flat-square
+[ico-dockerbuild]: https://img.shields.io/docker/build/meanbee/magento2-php.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/docker/pulls/meanbee/magento2-php.svg?style=flat-square
+[ico-dockerstars]: https://img.shields.io/docker/stars/meanbee/magento2-php.svg?style=flat-square
+
+[link-travis]: https://travis-ci.org/meanbee/docker-magento2
+[link-dockerhub]: https://hub.docker.com/r/meanbee/magento2-php

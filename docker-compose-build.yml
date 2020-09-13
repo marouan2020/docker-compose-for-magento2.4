@@ -1,7 +1,8 @@
 version: "2"
 services:
   varnish:
-    image: meanbee/magento2-varnish:latest
+    build:
+      context: varnish/
     environment:
       - VIRTUAL_HOST=magento2.docker
       - VIRTUAL_PORT=80
@@ -12,7 +13,8 @@ services:
       - web
 
   web:
-    image: meanbee/magento2-nginx:1.9
+    build:
+      context: nginx/
     ports:
       - 80
     links:
@@ -29,7 +31,8 @@ services:
 
   fpm:
     hostname: fpm.magento2.docker
-    image: meanbee/magento2-php:7.4-fpm
+    build:
+      context: 7.4-fpm/
     ports:
       - 9000
     links:
@@ -50,11 +53,11 @@ services:
       - MYSQL_DATABASE=magento2
       - MYSQL_USER=magento2
       - MYSQL_PASSWORD=magento2
-      - TERM=meh
 
   cli:
     hostname: cli.magento2.docker
-    image: meanbee/magento2-php:7.4-cli
+    build:
+      context: 7.4-cli/
     links:
       - db
     volumes:
@@ -75,18 +78,17 @@ services:
       - M2SETUP_BACKEND_FRONTNAME=admin
       - M2SETUP_ADMIN_FIRSTNAME=Admin
       - M2SETUP_ADMIN_LASTNAME=User
-      - M2SETUP_ADMIN_EMAIL=marouan.ben.mansour@gmail.com
+      - M2SETUP_ADMIN_EMAIL=dummy@gmail.com
       - M2SETUP_ADMIN_USER=admin
       - M2SETUP_ADMIN_PASSWORD=password1
       - M2SETUP_VERSION=2.4.*
       # - M2SETUP_USE_SAMPLE_DATA=true
 
   cron:
-    image: meanbee/magento2-php:7.4-cli
+    build:
+      context: 7.4-cli/
     hostname: magento2-cron.docker
     command: run-cron
-    env_file:
-      - ./global.env    
     environment:
       - ENABLE_SENDMAIL=true
     volumes_from:
