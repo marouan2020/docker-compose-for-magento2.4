@@ -1,4 +1,22 @@
 #Installer Magento 2.4 en utilisant Docker et Docker-Compose.
+[![vagrant](https://img.shields.io/badge/vagrant-debian:stretch-blue.svg?longCache=true&style=flat&label=vagrant&logo=vagrant)](https://app.vagrantup.com/debian/boxes/stretch64)
+[![dev-box](https://img.shields.io/badge/git/composer-blue.svg?longCache=true&style=flat&label=setup&logo=magento)](https://github.com/zepgram/magento2-fast-vm/blob/master/config.yaml.example)
+[![mount](https://img.shields.io/badge/nfs/rsync-blue.svg?longCache=true&style=flat&label=mount)](https://github.com/zepgram/magento2-fast-vm/releases)
+[![release](https://img.shields.io/badge/release-v1.3.6-blue.svg?longCache=true&style=flat&label=release)](https://github.com/zepgram/magento2-fast-vm/releases)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg?longCache=true&style=flat&label=license)](https://github.com/zepgram/magento2-fast-vm/blob/master/LICENSE)
+
+![windows](https://img.shields.io/badge/windows-ok-green.svg?longCache=true&style=flat&label=windows&logo=windows)
+![apple](https://img.shields.io/badge/mac-ok-green.svg?longCache=true&style=flat&label=mac&logo=apple)
+![linux](https://img.shields.io/badge/linux-ok-green.svg?longCache=true&style=flat&label=linux&logo=linux)
+
+![image](https://user-images.githubusercontent.com/16258478/68086496-0d43e100-fe4d-11e9-95ea-2bce3bee9884.png)&nbsp;&nbsp;&nbsp;&nbsp;![image](https://user-images.githubusercontent.com/16258478/68086436-70814380-fe4c-11e9-8ef4-6e39388cc679.png)&nbsp;&nbsp;&nbsp;&nbsp;![image](https://user-images.githubusercontent.com/16258478/68086442-7545f780-fe4c-11e9-8c5e-518ddba8735d.png)&nbsp;&nbsp;&nbsp;&nbsp;![image](https://user-images.githubusercontent.com/16258478/68086695-ba6b2900-fe4e-11e9-8f4f-68feb9bb0db2.png)&nbsp;&nbsp;&nbsp;&nbsp;![image](https://user-images.githubusercontent.com/16258478/68086427-62cbbe00-fe4c-11e9-83d5-24aec5b7c686.png)
+
+[![associate-developer](https://images.youracclaim.com/size/340x340/images/48e73336-c91d-477f-a66f-3ad950acb597/Adobe_Certified_Professional_Experience_Cloud_products_Digital_Badge.png)](https://www.youracclaim.com/earner/earned/badge/406cc91a-0fda-4a6f-846b-19d7f8b59e0a)
+
+#Sources
+Avant de commencer, cela fait un moment que j’utilise Docker pour développer sous Magento 2. Après avoir testé plusieurs solutions, je me suis basé sur la solution proposée par Mark Shust.
+J’ai également visionné un paquet de vidéos de la chaîne Xavki.
+
 #Arborescence
 Commencer par créer le répertoire de travail et au sein de ce dossier, créer les répertoires suivants :
 
