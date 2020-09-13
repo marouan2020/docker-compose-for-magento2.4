@@ -4,7 +4,7 @@
 
 FROM <?php printf("php:%s-%s\n", $version, $flavour) ?>
 
-MAINTAINER Nick Jones <nick@nicksays.co.uk>
+MAINTAINER Ben Mansour Marouan <marouan.ben.mansour@gmail.com>
 <?php
     $versionSpecificPackages = [];
 

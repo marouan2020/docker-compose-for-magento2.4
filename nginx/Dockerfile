@@ -1,6 +1,6 @@
 FROM nginx:1.9
 
-MAINTAINER Nick Jones <nick@nicksays.co.uk>
+MAINTAINER Ben Mansour Marouan <marouan.ben.mansour@gmail.com>
 
 ADD etc/vhost.conf /etc/nginx/conf.d/default.conf
 COPY etc/certs/ /etc/nginx/ssl/

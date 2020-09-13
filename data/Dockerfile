@@ -1,6 +1,6 @@
 FROM cweagans/bg-sync:latest
 
-MAINTAINER Tomas Gerulaitis <tomas.gerulaitis@meanbee.com>
+MAINTAINER Ben Mansour Marouan <marouan.ben.mansour@gmail.com>
 
 COPY magento/ /var/www/magento/
 # The order of the chown and VOLUME instructions is important to preserve file ownership

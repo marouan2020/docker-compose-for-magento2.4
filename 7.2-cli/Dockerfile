@@ -4,7 +4,7 @@
 
 FROM php:7.2-cli
 
-MAINTAINER Nick Jones <nick@nicksays.co.uk>
+MAINTAINER Ben Mansour Marouan <marouan.ben.mansour@gmail.com>
 
 # Install dependencies
 RUN apt-get update \
