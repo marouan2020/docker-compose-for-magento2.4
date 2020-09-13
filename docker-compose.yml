@@ -1,0 +1,103 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: ./docker-images/nginx/${NGINX_VERSION}
+    ports:
+      - 80:8000
+    links:
+      - phpfpm
+      - redis:cache
+    volumes:
+      - ./src/app_data1:/var/www/html
+      - ./src/sock_data1:/sock
+      - ./src/nginx_log1:/var/log/nginx
+    networks:
+      - magento
+
+  phpfpm:
+    build:
+      context: ./docker-images/php/${PHP_VERSION}
+    links:
+      - mariadb1
+    volumes:
+      - ./docker-images/php/${PHP_VERSION}/.composer:/var/www/.composer
+      - ./src/app_data1:/var/www/html
+      - ./src/phpfpm_log1:/var/log
+      - ./src/sock_data1:/sock
+    networks:
+      - magento
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    restart: on-failure:5
+    volumes:
+      - ./src/redis_data1:/data
+    expose:
+      - 6379
+    networks:
+      - magento
+
+  cron:
+    build:
+      context: ./docker-images/php/${PHP_VERSION}
+    user: root
+    command: /usr/local/bin/cronstart
+    tty: true
+    links:
+      - mariadb1
+      - elasticsearch1
+      - rabbitmq
+    volumes:
+      - ./src/app_data1:/var/www/html
+      - ./src/sock_data1:/sock
+    networks:
+      - magento
+
+  mariadb1:
+    image: mariadb:${MARIADB_VERSION}
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./src/mariadb_data1:/var/lib/mysql
+      - ./src/mariadb_log1:/var/log/mysql
+    ports:
+      - 3306:3306
+    networks:
+      - magento
+
+  elasticsearch1:
+    image: elasticsearch:${ELASTICSEARCH_VERSION}
+    environment:
+      - cluster.name=es-cluster
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - cluster.initial_master_nodes=elasticsearch1
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./src/es_data1:/usr/share/elasticsearch/data
+      - ./src/es_log1:/var/log/elasticsearch
+    networks:
+      - magento
+
+  rabbitmq:
+    image: rabbitmq:${RABBITMQ_VERSION}
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - magento
+
+networks:
+  magento:
+    driver: bridge
