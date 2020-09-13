@@ -1,6 +1,11 @@
-# docker-compose-for-magento2.4
+#Installer Magento 2.4 en utilisant Docker et Docker-Compose.
+#Arborescence
+Commencer par créer le répertoire de travail et au sein de ce dossier, créer les répertoires suivants :
+
+mkdir -p src/app_data1 src/nginx_log1 src/phpfpm_log1 src/sock_data1 src/mariadb_data1 src/m
 
 #Build et Installation
+
 Lancer la commande ci-dessous pour construire et lancer les conteneurs :
 
 docker-compose build && docker-compose up -d
