@@ -49,6 +49,7 @@ services:
     volumes:
       - ./src/mariadb_data1:/var/lib/mysql
       - ./src/mariadb_log1:/var/log/mysql
+      - ./src/mariadb_dump:/docker-entrypoint-initdb.d/
     ports:
       - 3306:3306
 

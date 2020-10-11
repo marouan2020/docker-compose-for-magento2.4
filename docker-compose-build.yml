@@ -1,44 +1,41 @@
-version: "2"
+version: "3"
 services:
   varnish:
     build:
-      context: varnish/
+      context: ./varnish
     environment:
       - VIRTUAL_HOST=magento2.docker
-      - VIRTUAL_PORT=80
+      - VIRTUAL_PORT=8000
       - HTTPS_METHOD=noredirect
     ports:
-      - 80
+      - "8005:8005"
     links:
-      - web
+      - nginx
 
-  web:
+  nginx:
     build:
-      context: nginx/
+      context: ./nginx
     ports:
       - 80
     links:
       - fpm
       - db
-    volumes_from:
-      - appdata
+      - redis:cache
+    volumes:
+      - ./magento:/var/www/magento
     env_file:
       - ./global.env
-    #environment:
-      #- VIRTUAL_HOST=magento2.docker
-      #- VIRTUAL_PORT=80
-      #- HTTPS_METHOD=noredirect
 
   fpm:
     hostname: fpm.magento2.docker
     build:
-      context: 7.4-fpm/
+      context: ${PHP_VERSION}-fpm
     ports:
       - 9000
     links:
       - db
-    volumes_from:
-      - appdata
+    volumes:
+      - ./magento:/var/www/magento
     env_file:
       - ./global.env
 
@@ -58,13 +55,13 @@ services:
   cli:
     hostname: cli.magento2.docker
     build:
-      context: 7.4-cli/
+      context: ./${PHP_VERSION}-cli
     links:
       - db
     volumes:
       - ~/.composer/cache:/root/.composer/cache
-    volumes_from:
-      - appdata
+    volumes:
+      - ./magento:/var/www/magento
     env_file:
       - ./global.env
       - ./composer.env
@@ -79,7 +76,7 @@ services:
       - M2SETUP_BACKEND_FRONTNAME=admin
       - M2SETUP_ADMIN_FIRSTNAME=Admin
       - M2SETUP_ADMIN_LASTNAME=User
-      - M2SETUP_ADMIN_EMAIL=dummy@gmail.com
+      - M2SETUP_ADMIN_EMAIL=marouan.ben.mansour@gmail.com
       - M2SETUP_ADMIN_USER=admin
       - M2SETUP_ADMIN_PASSWORD=password1
       - M2SETUP_VERSION=2.4.*
@@ -87,24 +84,26 @@ services:
 
   cron:
     build:
-      context: 7.4-cli/
+      context: ./${PHP_VERSION}-cli
     hostname: magento2-cron.docker
     command: run-cron
+    env_file:
+      - ./global.env    
     environment:
       - ENABLE_SENDMAIL=true
-    volumes_from:
-      - appdata
+    volumes:
+      - ./magento:/var/www/magento
     links:
       - db
 
-  elasticsearch1:
+  es:
     image: elasticsearch:${ELASTICSEARCH_VERSION}
     environment:
       - cluster.name=es-cluster
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
-      - cluster.initial_master_nodes=elasticsearch1
+      - cluster.initial_master_nodes=elasticsearch
     ulimits:
       memlock:
         soft: -1
@@ -122,12 +121,31 @@ services:
       - 15672:15672
       - 5672:5672
 
-  appdata:
-    image: tianon/true
+  redis:
+    image: redis:${REDIS_VERSION}
+    restart: on-failure:5
     volumes:
-      - ./magento:/var/www/magento
+      - ./src/redis_data1:/data
+    expose:
+      - 6379
 
-  dbdata:
-    image: tianon/true
-    volumes:
-      - /var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    links:
+      - db:db
+    ports:
+      - "8080:80"
+    environment:
+      MYSQL_USERNAME: ${MYSQL_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      PMA_HOST: db
+    depends_on:
+      - db
+
+  mailcatcher:
+    build: ./mailcatcher/docker
+    ports:
+      - 6009:1080
+    labels:
+      container_group: mail
