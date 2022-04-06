@@ -125,14 +125,4 @@ Individual templates may include other templates as partials.
 [link-travis]: https://travis-ci.org/meanbee/docker-magento2
 [link-dockerhub]: https://hub.docker.com/r/meanbee/magento2-php
 
-ESSEU:
 
-7
-
-I upgraded my Magento 2.3.5 into 2.4.0 and now facing this error, very annoying to say the least,... I fixed it by disabling the Elastic Search module... injecting this into a Magento "update" is totally un-called for, very frustrating and annoying.
-
-After disabling these, my php /bin/magento setup:upgrade works fine now:
-
-php bin/magento module:disable {Magento_Elasticsearch,Magento_InventoryElasticsearch,Magento_Elasticsearch6,Magento_Elasticsearch7}
-
-I thought upgrading into 2.4.0 would make life better, I can't believe there are so many problems just to get into 2.4.0.... don't know what I am walking into, ... I hope my installation that I am about to deploy does not break as a result of so many unwanted modules added into the 2.4.0 update before even trying it yet!...
